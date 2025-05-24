@@ -51,7 +51,7 @@ function App() {
           <Database />
           <span>dynamic_object</span>
         </div>
-        <div className='email-form'>
+        <div className='field email-form'>
           <span>email: Form A.email</span>
           <button>
             <Close />
