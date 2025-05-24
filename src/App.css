@@ -47,13 +47,14 @@ svg {
 }
 
 button {
-  border-radius: 50%;
   border: 0px solid transparent;
   display: flex;
   align-items: center;
+  border-radius: 3px;
   pointer-events: auto;
   cursor: pointer;
   background: lightgrey;
+  padding: 0.25rem;
 
   &:hover {
     background: white;
