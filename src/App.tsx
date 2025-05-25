@@ -1,23 +1,19 @@
 import "./App.css";
 import React, { useEffect, useState } from "react";
 import { BlueprintGraph, FormInfo } from "./utils/types";
+import { API_URL } from "./utils/utils";
 import FormList from "./components/FormList";
+import ToggleButton from "./components/ToggleButton";
 
-const MOCK_SERVER_BASE = process.env.REACT_APP_MOCK_SERVER_BASE;
-const TENANT_ID = process.env.REACT_APP_TENANT_ID;
-const ACTION_BLUEPRINT_ID = process.env.REACT_APP_ACTION_BLUEPRINT_ID;
-
-const API_URL = `${MOCK_SERVER_BASE}/api/v1/${TENANT_ID}/actions/blueprints/${ACTION_BLUEPRINT_ID}/graph`;
-
-const PREFILL_CONFIG = {
+export const PREFILL_CONFIG = {
     email: { formName: "Form A", field: "email" } as FormInfo,
     dynamic_checkbox_group: null,
     dynamic_object: null,
 };
-
 function App() {
     const [graphData, setGraphData] = useState<BlueprintGraph | null>(null);
     const [error, setError] = useState<null | string>(null);
+    const [editMode, setEditMode] = useState(false);
 
     useEffect(() => {
         const fetchFormGraph = async () => {
@@ -44,18 +40,34 @@ function App() {
         return <div>Loading...</div>;
     }
 
+    if (error) {
+        return <div className="error">{error}</div>;
+    }
+
     return (
-        <div className="App">
-            <div className="header">
-                <h2>Prefill</h2>
-                <span className="description">
-                    Prefill fields for this form
-                </span>
+        !error && (
+            <div className="App">
+                <div className="header-wrapper">
+                    <div className="header">
+                        <h2>Prefill</h2>
+                        <span className="description">
+                            Prefill fields for this form
+                        </span>
+                    </div>
+                    <div className="toggle">
+                        <span>{editMode ? "Edit" : "View"}</span>
+                        <ToggleButton onClick={() => setEditMode(!editMode)} />
+                    </div>
+                </div>
+                <div className={`fields ${!editMode ? "view" : ""}`}>
+                    <FormList
+                        formData={graphData}
+                        prefillConfig={PREFILL_CONFIG}
+                        editMode={editMode}
+                    />
+                </div>
             </div>
-            <div className="fields">
-                <FormList formData={graphData} prefillConfig={PREFILL_CONFIG} />
-            </div>
-        </div>
+        )
     );
 }
 

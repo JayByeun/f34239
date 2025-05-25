@@ -2,14 +2,17 @@ import React, { JSX, useState, useEffect } from "react";
 import Database from "../icons/Database";
 import Close from "../icons/Close";
 import PrefillModal from "./PrefillModal";
+import "./styles/FormList.css";
 import { Node, Form, BlueprintGraph, PrefillConfig } from "../utils/types";
 
 const FormList = ({
     formData,
     prefillConfig,
+    editMode,
 }: {
     formData: BlueprintGraph;
     prefillConfig: PrefillConfig;
+    editMode: boolean;
 }): JSX.Element => {
     const [open, setOpen] = useState(false);
     const [prefillValues, setPrefillValues] = useState<
@@ -56,46 +59,70 @@ const FormList = ({
                 ...prev,
                 [activeField]: key,
             }));
-            setActiveField(null); // Reset active field after selection
-            setOpen(false); // Close modal
+            setActiveField(null);
+            setOpen(false);
         }
     };
 
     const openPrefillModal = (fieldName: string) => {
+        if (!editMode) {
+            return;
+        }
         setActiveField(fieldName);
         setOpen(true);
     };
 
+    const firstField = (
+        <div
+            data-testid="first"
+            className={`field dynamic-checkbox ${
+                !prefillMapping["dynamic_checkbox_group"] ? "empty" : ""
+            }`}
+            onClick={() => openPrefillModal("dynamic_checkbox_group")}
+        >
+            <Database />
+            <span>
+                {prefillMapping["dynamic_checkbox_group"] ??
+                    "dynamic_checkbox_group"}
+            </span>
+        </div>
+    );
+
+    const secondField = (
+        <div
+            data-testid="second"
+            className={`field dynamic-object ${
+                !prefillMapping["dynamic_object"] ? "empty" : ""
+            }`}
+            onClick={() => openPrefillModal("dynamic_object")}
+        >
+            <Database />
+            <span>{prefillMapping["dynamic_object"] ?? "dynamic_object"}</span>
+        </div>
+    );
+
+    const thirdField = (
+        <div data-testid="third" className="email-form">
+            <span>email: {prefillValues.email}</span>
+            <button
+                data-testid="clear"
+                className={!editMode ? "view" : ""}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    prefillValues["email"] = null;
+                    setPrefillValues({ ...prefillValues, email: null });
+                }}
+            >
+                <Close />
+            </button>
+        </div>
+    );
+
     return (
         <>
-            <div
-                className="field dynamic-checkbox"
-                onClick={() => openPrefillModal("dynamic_checkbox_group")}
-            >
-                <Database />
-                <span>
-                    {prefillMapping["dynamic_checkbox_group"] ??
-                        "dynamic_checkbox_group"}
-                </span>
-            </div>
-            <div
-                className="field dynamic-object"
-                onClick={() => openPrefillModal("dynamic_object")}
-            >
-                <Database />
-                <span>
-                    {prefillMapping["dynamic_object"] ?? "dynamic_object"}
-                </span>
-            </div>
-            <div
-                className="field email-form"
-                onClick={() => openPrefillModal("email")}
-            >
-                <span>email: {prefillValues.email}</span>
-                <button>
-                    <Close />
-                </button>
-            </div>
+            {firstField}
+            {secondField}
+            {thirdField}
             <PrefillModal
                 open={open}
                 onClose={() => setOpen(false)}

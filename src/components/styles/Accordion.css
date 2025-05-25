@@ -1,0 +1,45 @@
+.accordion {
+    display: flex;
+    flex-direction: column;
+    font-weight: 400;
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    overflow: unset;
+    margin-bottom: 0.25rem;
+
+}
+
+.name {
+    height: 2rem;
+    width: 100%;
+    padding: 0.25rem;
+    background: none;
+    text-align: left;
+    svg {
+        width: 1rem;
+        padding: 0.25rem;
+    }
+        &:hover {
+        background: gainsboro;
+    }
+}
+
+.details {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0.5rem 1rem;
+    
+    .field-key {
+        padding: .5rem .75rem;
+        background: none;
+        cursor: pointer;
+
+        &:hover {
+            background: lightcyan
+        }
+    }
+}

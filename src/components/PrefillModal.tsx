@@ -2,9 +2,8 @@ import React, { JSX, useState, useEffect } from "react";
 import Close from "../icons/Close";
 import Search from "../icons/Search";
 import "./styles/PrefillModal.css";
-import RightArrow from "../icons/RightArrow";
 import { BlueprintGraph, Node, Form } from "../utils/types";
-import ArrowDown from "../icons/ArrowDown";
+import Accordion from "./Accordion";
 
 const PrefillModal = ({
     open,
@@ -49,6 +48,7 @@ const PrefillModal = ({
                 const entries = Object.entries(form.field_schema.properties);
                 const spans = entries.map(([key, value]) => (
                     <span
+                        data-testid={key}
                         className="field-key"
                         key={key}
                         onClick={() => {
@@ -71,11 +71,86 @@ const PrefillModal = ({
 
         setAvailableData(updatedData);
     }, [formData]);
+
+    const closeSelf = () => {
+        setSearch("");
+        setSelectedKey(null);
+        setSelectedValue(null);
+        onClose();
+    };
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            closeSelf();
+        }
+    });
+
+    const sidebar = (
+        <div className="sidebar">
+            <span>Available data</span>
+            <div className="search">
+                <Search />
+                <input
+                    name="search"
+                    placeholder="Search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+            </div>
+            <Accordion
+                items={availableData.filter((item) =>
+                    item.title.toLowerCase().includes(search.toLowerCase())
+                )}
+            />
+        </div>
+    );
+
+    const formContent = (
+        <div className="content">
+            {selectedKey ? (
+                <>
+                    <h3>
+                        Selected Key: <code>{selectedKey}</code>
+                    </h3>
+                    <pre>{JSON.stringify(selectedValue, null, 2)}</pre>
+                </>
+            ) : (
+                <span>Select a field to view its value</span>
+            )}
+        </div>
+    );
+
+    const buttons = (
+        <div className="buttons">
+            <button className="cancel" onClick={closeSelf}>
+                Cancel
+            </button>
+            <button
+                data-testid="select"
+                disabled={!selectedKey}
+                className="select"
+                onClick={() => {
+                    if (!selectedKey) {
+                        return;
+                    }
+                    onSelectPrefill(selectedKey);
+                    closeSelf();
+                }}
+            >
+                Select
+            </button>
+        </div>
+    );
+
     return (
         open && (
-            <div className="overlay">
-                <div className="modal" onClick={(e) => e.stopPropagation()}>
-                    <button className="close" onClick={onClose}>
+            <div className="overlay" onClick={closeSelf}>
+                <div
+                    data-testid="modal"
+                    className="modal"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <button className="close" onClick={closeSelf}>
                         <Close />
                     </button>
                     <div className="contents-wrapper">
@@ -83,67 +158,10 @@ const PrefillModal = ({
                             Select data element to map
                         </span>
                         <div className="container">
-                            <div className="sidebar">
-                                <span>Available data</span>
-                                <div className="search">
-                                    <Search />
-                                    <input
-                                        name="search"
-                                        placeholder="Search"
-                                        value={search}
-                                        onChange={(e) =>
-                                            setSearch(e.target.value)
-                                        }
-                                    />
-                                </div>
-                                <Accordion
-                                    items={availableData.filter((item) =>
-                                        item.title
-                                            .toLowerCase()
-                                            .includes(search.toLowerCase())
-                                    )}
-                                />
-                            </div>
-                            <div className="content">
-                                {selectedKey ? (
-                                    <>
-                                        <h3>
-                                            Selected Key:{" "}
-                                            <code>{selectedKey}</code>
-                                        </h3>
-                                        <pre>
-                                            {JSON.stringify(
-                                                selectedValue,
-                                                null,
-                                                2
-                                            )}
-                                        </pre>
-                                    </>
-                                ) : (
-                                    <span>
-                                        Select a field to view its value
-                                    </span>
-                                )}
-                            </div>
+                            {sidebar}
+                            {formContent}
                         </div>
-                        <div className="buttons">
-                            <button className="cancel" onClick={onClose}>
-                                Cancel
-                            </button>
-                            <button
-                                disabled={!selectedKey}
-                                className="select"
-                                onClick={() => {
-                                    if (!selectedKey) {
-                                        return;
-                                    }
-                                    onSelectPrefill(selectedKey);
-                                    onClose();
-                                }}
-                            >
-                                Select
-                            </button>
-                        </div>
+                        {buttons}
                     </div>
                 </div>
             </div>
@@ -152,35 +170,3 @@ const PrefillModal = ({
 };
 
 export default PrefillModal;
-
-interface AccordionItem {
-    title: string;
-    content: React.ReactNode;
-}
-
-const Accordion = ({ items }: { items: AccordionItem[] }) => {
-    const [openIndex, setOpenIndex] = useState<null | number>(null);
-
-    const toggleIndex = (index: number) => {
-        setOpenIndex(openIndex === index ? null : index);
-    };
-
-    return (
-        <div className="accordion">
-            {items.map((item, index) => (
-                <div key={index} className="container">
-                    <button
-                        onClick={() => toggleIndex(index)}
-                        className="title"
-                    >
-                        {openIndex === index ? <ArrowDown /> : <RightArrow />}
-                        {item.title}
-                    </button>
-                    {openIndex === index && (
-                        <div className="content">{item.content}</div>
-                    )}
-                </div>
-            ))}
-        </div>
-    );
-};
