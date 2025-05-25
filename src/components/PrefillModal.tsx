@@ -10,10 +10,12 @@ const PrefillModal = ({
     open,
     onClose,
     formData,
+    onSelectPrefill,
 }: {
     open: boolean;
     onClose: () => void;
     formData: BlueprintGraph;
+    onSelectPrefill: (key: string) => void;
 }): boolean | JSX.Element => {
     const [availableData, setAvailableData] = useState([
         { title: "Action Properties", content: <span>No content</span> },
@@ -25,6 +27,8 @@ const PrefillModal = ({
         { title: "Form B", content: <span>No content</span> },
     ]);
     const [search, setSearch] = useState("");
+    const [selectedKey, setSelectedKey] = useState<string | null>(null);
+    const [selectedValue, setSelectedValue] = useState<any>(null);
 
     useEffect(() => {
         const formTitles = ["Form A", "Form B"];
@@ -42,9 +46,17 @@ const PrefillModal = ({
             );
 
             if (form?.field_schema?.properties) {
-                const keys = Object.keys(form.field_schema.properties);
-                const spans = keys.map((key) => (
-                    <span className="field-key" key={key}>
+                const entries = Object.entries(form.field_schema.properties);
+                const spans = entries.map(([key, value]) => (
+                    <span
+                        className="field-key"
+                        key={key}
+                        onClick={() => {
+                            setSelectedKey(key);
+                            setSelectedValue(value);
+                            onSelectPrefill(key);
+                        }}
+                    >
                         {key}
                     </span>
                 ));
@@ -92,11 +104,45 @@ const PrefillModal = ({
                                     )}
                                 />
                             </div>
-                            <div className="content"></div>
+                            <div className="content">
+                                {selectedKey ? (
+                                    <>
+                                        <h3>
+                                            Selected Key:{" "}
+                                            <code>{selectedKey}</code>
+                                        </h3>
+                                        <pre>
+                                            {JSON.stringify(
+                                                selectedValue,
+                                                null,
+                                                2
+                                            )}
+                                        </pre>
+                                    </>
+                                ) : (
+                                    <span>
+                                        Select a field to view its value
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         <div className="buttons">
-                            <button className="cancel">Cancel</button>
-                            <button className="select">Select</button>
+                            <button className="cancel" onClick={onClose}>
+                                Cancel
+                            </button>
+                            <button
+                                disabled={!selectedKey}
+                                className="select"
+                                onClick={() => {
+                                    if (!selectedKey) {
+                                        return;
+                                    }
+                                    onSelectPrefill(selectedKey);
+                                    onClose();
+                                }}
+                            >
+                                Select
+                            </button>
                         </div>
                     </div>
                 </div>

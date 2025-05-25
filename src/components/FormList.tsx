@@ -15,6 +15,10 @@ const FormList = ({
     const [prefillValues, setPrefillValues] = useState<
         Record<string, null | string>
     >({});
+    const [activeField, setActiveField] = useState<string | null>(null);
+    const [prefillMapping, setPrefillMapping] = useState<
+        Record<string, string>
+    >({});
 
     useEffect(() => {
         const newPrefillValues: Record<string, null | string> = {};
@@ -46,29 +50,57 @@ const FormList = ({
         setPrefillValues(newPrefillValues);
     }, [formData]);
 
+    const handlePrefillSelect = (key: string) => {
+        if (activeField) {
+            setPrefillMapping((prev) => ({
+                ...prev,
+                [activeField]: key,
+            }));
+            setActiveField(null); // Reset active field after selection
+            setOpen(false); // Close modal
+        }
+    };
+
+    const openPrefillModal = (fieldName: string) => {
+        setActiveField(fieldName);
+        setOpen(true);
+    };
+
     return (
         <>
-            <div className="field dynamic-checkbox">
+            <div
+                className="field dynamic-checkbox"
+                onClick={() => openPrefillModal("dynamic_checkbox_group")}
+            >
                 <Database />
                 <span>
-                    {prefillValues.dynamic_checkbox_group ??
-                        "dynamic-checkbox_group"}
+                    {prefillMapping["dynamic_checkbox_group"] ??
+                        "dynamic_checkbox_group"}
                 </span>
             </div>
-            <div className="field dynamic-object">
+            <div
+                className="field dynamic-object"
+                onClick={() => openPrefillModal("dynamic_object")}
+            >
                 <Database />
-                <span>{prefillValues.dynamic_object ?? "dynamic-object"}</span>
+                <span>
+                    {prefillMapping["dynamic_object"] ?? "dynamic_object"}
+                </span>
             </div>
-            <div className="field email-form" onClick={() => setOpen(true)}>
+            <div
+                className="field email-form"
+                onClick={() => openPrefillModal("email")}
+            >
                 <span>email: {prefillValues.email}</span>
                 <button>
                     <Close />
                 </button>
             </div>
             <PrefillModal
-                open={true}
+                open={open}
                 onClose={() => setOpen(false)}
                 formData={formData}
+                onSelectPrefill={handlePrefillSelect}
             />
         </>
     );
