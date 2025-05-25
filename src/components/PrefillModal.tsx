@@ -4,6 +4,7 @@ import Search from "../icons/Search";
 import "./styles/PrefillModal.css";
 import RightArrow from "../icons/RightArrow";
 import { BlueprintGraph, Node, Form } from "../utils/types";
+import ArrowDown from "../icons/ArrowDown";
 
 const PrefillModal = ({
     open,
@@ -23,39 +24,40 @@ const PrefillModal = ({
         { title: "Form A", content: <span>No content</span> },
         { title: "Form B", content: <span>No content</span> },
     ]);
+    const [search, setSearch] = useState("");
+
     useEffect(() => {
-        const node = formData.nodes.find(
-            (node: Node) => node.data.name === "Form A"
-        );
-        const componentId = node?.data?.component_id;
-        const form = formData.forms.find(
-            (form: Form) => form.id === componentId
-        );
+        const formTitles = ["Form A", "Form B"];
 
-        if (form && form.field_schema && form.field_schema.properties) {
-            const keys = Object.keys(form.field_schema.properties);
-            const spans = keys.map((key) => (
-                <span className="field-key" key={key}>
-                    {key}
-                </span>
-            ));
+        const updatedData = availableData.map((item) => {
+            if (!formTitles.includes(item.title)) {
+                return item;
+            }
+            const node = formData.nodes.find(
+                (node: Node) => node.data.name === item.title
+            );
+            const componentId = node?.data?.component_id;
+            const form = formData.forms.find(
+                (form: Form) => form.id === componentId
+            );
 
-            setAvailableData((prev) =>
-                prev.map((item) =>
-                    item.title === "Form A"
-                        ? { ...item, content: <>{spans}</> }
-                        : item
-                )
-            );
-        } else {
-            setAvailableData((prev) =>
-                prev.map((item) =>
-                    item.title === "Form A"
-                        ? { ...item, content: <span>No content</span> }
-                        : item
-                )
-            );
-        }
+            if (form?.field_schema?.properties) {
+                const keys = Object.keys(form.field_schema.properties);
+                const spans = keys.map((key) => (
+                    <span className="field-key" key={key}>
+                        {key}
+                    </span>
+                ));
+                return { ...item, content: <>{spans}</> };
+            } else {
+                return {
+                    ...item,
+                    content: <span className="field-key">No content</span>,
+                };
+            }
+        });
+
+        setAvailableData(updatedData);
     }, [formData]);
     return (
         open && (
@@ -64,17 +66,38 @@ const PrefillModal = ({
                     <button className="close" onClick={onClose}>
                         <Close />
                     </button>
-                    <span className="header">Select data element to map</span>
-                    <div className="container">
-                        <div className="sidebar">
-                            <span>Available data</span>
-                            <div className="search">
-                                <Search />
-                                <input name="search" placeholder="Search" />
+                    <div className="contents-wrapper">
+                        <span className="header">
+                            Select data element to map
+                        </span>
+                        <div className="container">
+                            <div className="sidebar">
+                                <span>Available data</span>
+                                <div className="search">
+                                    <Search />
+                                    <input
+                                        name="search"
+                                        placeholder="Search"
+                                        value={search}
+                                        onChange={(e) =>
+                                            setSearch(e.target.value)
+                                        }
+                                    />
+                                </div>
+                                <Accordion
+                                    items={availableData.filter((item) =>
+                                        item.title
+                                            .toLowerCase()
+                                            .includes(search.toLowerCase())
+                                    )}
+                                />
                             </div>
-                            <Accordion items={availableData} />
+                            <div className="content"></div>
                         </div>
-                        <div className="content"></div>
+                        <div className="buttons">
+                            <button className="cancel">Cancel</button>
+                            <button className="select">Select</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -104,7 +127,7 @@ const Accordion = ({ items }: { items: AccordionItem[] }) => {
                         onClick={() => toggleIndex(index)}
                         className="title"
                     >
-                        <RightArrow />
+                        {openIndex === index ? <ArrowDown /> : <RightArrow />}
                         {item.title}
                     </button>
                     {openIndex === index && (
