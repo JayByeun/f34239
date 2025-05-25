@@ -1,70 +1,127 @@
-# Getting Started with Create React App
+# Prefill UI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React-based application for visualizing and configuring field prefill mappings in dynamic forms.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🚀 How do I run this locally?
 
-### `npm start`
+### 1. Clone the repository
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```bash
+git clone https://github.com/JayByeun/f34239.git
+cd f34239
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 2. Install dependencies
 
-### `npm test`
+```bash
+yarn install
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 3. Start the development server
 
-### `npm run build`
+```bash
+yarn start
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 4. Run tests
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+-   Run all tests:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+yarn test
+```
 
-### `npm run eject`
+-   Watch mode (for devleopment):
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+yarn run test:watch
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🧩 How do I extend with new data sources?
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 1. Update `PREFILL_CONFIG` in `APP.tsx`
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```
+export const PREFILL_CONFIG = {
+  email: { formName: "Form A", field: "email" },
+  newField: { formName: "Form X", field: "custom_id" }, // Add new source
+};
+```
 
-## Learn More
+### 2. Ensure the from exsits in `graphData.forms`
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The new form must:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+-   Be present in `graphData.forms`
+-   Define the relevant `field_schema.properties`
 
-### Code Splitting
+### 3. Update `PrefillModa.tsx` if special behavior is needed for the new source
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 🧠 What patterns should I be paying attention to?
 
-### Analyzing the Bundle Size
+-   Controlled Components
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+    State is manged using React's `useState`.
 
-### Making a Progressive Web App
+-   Component Composiion
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+    Modular components like `ToggleButton`, `Accordion`, and `PrefillModal` improve readability and reuse.
 
-### Advanced Configuration
+-   Data-Driven UI
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+    Forms and fields are rendered dynamically based on backend's `BlueprintGraph`.
 
-### Deployment
+-   Conditional Rendering
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+    View / Edit modes and modal visiblity are conditioanlly rendered using boolean.
 
-### `npm run build` fails to minify
+-   Testable Architecture
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+    Build with Vitest, and compoents are tested with `@testing-library/react` for UI interactions.
+
+## 🏛️ Project Structure
+
+```
+src/
+├── components/
+│   ├── styles/
+│   │   ├── Accordion.css
+│   │   ├── FormList.css
+│   │   ├── PrefillModal.css
+│   │   └── ToggleButton.css
+│   ├── Accordion.tsx
+│   ├── ToggleButton.tsx
+│   ├── FormList.tsx
+│   └── PrefillModal.tsx
+├── icons/
+│   ├── ArrowDown.tsx
+│   ├── Close.tsx
+│   ├── Database.tsx
+│   ├── RightArrow.tsx
+│   └── Search.tsx
+├── test/
+│   ├── App.test.tsx
+│   └── setup.ts
+├── utils/
+│   ├── types.ts
+│   └── utils.ts
+├── App.tsx
+├── App.css
+├── index.css
+└── index.tsx
+```
+
+## 🛠️ Example Scripts
+
+```
+"scripts": {
+  "start": "PORT=3002 react-scripts start",
+  "build": "react-scripts build",
+  "eject": "react-scripts eject",
+  "test": "vitest",
+  "test:watch": "vitest --watch"
+  "clean": "rm -rf node_modules package-lock.json"
+}
+```
