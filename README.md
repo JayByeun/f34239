@@ -19,7 +19,7 @@ cd f34239
 yarn install
 ```
 
-### 3. Start the development server
+### 3. Start the development server!
 
 ```bash
 yarn start
